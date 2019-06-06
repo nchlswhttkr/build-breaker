@@ -6,7 +6,7 @@ Make charitable contributions for the builds you break!
 
 ```
 go get github.com/nchlswhttkr/build-breaker
-github.com/nchlswhttkr/build-breaker
+cd $GOPATH/src/github.com/nchlswhttkr/build-breaker
 make
 ./bin/hello
 make clean
