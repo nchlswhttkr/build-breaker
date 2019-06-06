@@ -3,3 +3,11 @@
 Make charitable contributions for the builds you break!
 
 [We have a theme song!](https://youtu.be/YPG5ASujyZg)
+
+```
+go get github.com/nchlswhttkr/build-breaker
+github.com/nchlswhttkr/build-breaker
+make
+./bin/hello
+make clean
+```
