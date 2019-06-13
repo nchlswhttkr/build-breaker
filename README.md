@@ -24,5 +24,5 @@ aws cloudformation deploy \
     --parameter-overrides LambdaExecutionRole=$LAMBDA_EXECUTION_ROLE LambdaCodeBucket=$BUCKET_NAME
 
 # You can find the API of your URL as a stack output
-aws cloudformation describe-stacks --stack-name BuildBreaker --query "Stacks[0].Outputs[?OutputKey=='HelloWorld'].OutputValue" --output text
+aws cloudformation describe-stacks --stack-name BuildBreaker --query "Stacks[0].Outputs[?OutputKey=='HelloWorldUrl'].OutputValue" --output text
 ```
