@@ -4,7 +4,7 @@ Make charitable contributions for the builds you break!
 
 [We have a theme song!](https://youtu.be/YPG5ASujyZg)
 
-You will need to create a role for the Lambda to execute with (`$LAMBDA_EXECUTION_ROLE`) and to make a bucket (`$BUCKET_NAME`) to upload your code to AWS.
+You will need to create a blank role for the Lambda to execute with (`$LAMBDA_EXECUTION_ROLE`) and to make a bucket (`$BUCKET_NAME`) to upload your code to AWS.
 
 ```
 # Configure your Access Key ID/Secret and region, role and code bucket
@@ -18,12 +18,11 @@ make
 aws s3 cp handlers/** s3://$BUCKET_NAME/handlers/
 
 # Deploy the stack
-aws cloudformation package --template-file cloudformation.yml --s3-bucket build-breaker > cloudformation.packaged.yml
 aws cloudformation deploy \
     --stack-name BuildBreaker \
-    --template-file cloudformation.packaged.yml \
+    --template-file cloudformation.yml \
     --parameter-overrides LambdaExecutionRole=$LAMBDA_EXECUTION_ROLE LambdaCodeBucket=$BUCKET_NAME
 
 # You can find the API of your URL as a stack output
-aws cloudformation describe-stacks --stack-name BuildBreaker --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text
+aws cloudformation describe-stacks --stack-name BuildBreaker --query "Stacks[0].Outputs[?OutputKey=='HelloWorld'].OutputValue" --output text
 ```

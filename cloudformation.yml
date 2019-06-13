@@ -81,3 +81,6 @@ Outputs:
   ApiUrl:
     Description: The URL that can be used to access the backend
     Value: !Sub "https://${BuildBreakerApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}"
+  HelloWorldUrl:
+    Description: The URL that can be used to access the backend
+    Value: !Sub "https://${BuildBreakerApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/hello"
