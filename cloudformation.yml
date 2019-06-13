@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >
+  The template for https://github.com/nchlswhttkr/build-breaker
+
+  This stack uses the following resources, please be aware that you may incur
+  billing costs!
+    - Lambda
+    - S3 ()
+
+Parameters:
+  LambdaExecutionRole:
+    Type: String
+    Description: The role which lambda functions execute with
+  LambdaCodeBucket:
+    Type: String
+    Description: The ID of the bucket containing the code to run Lambdas off
+  StageName:
+    Type: String
+    Description: The name of the stage that the API will be deployed to
+    Default: production
+
+Resources:
+  BuildBreakerApi:
+    Type: AWS::ApiGateway::RestApi
+    Description: Creates an API GW that can be used to trigger functions
+    Properties:
+      Name: BuildBreakerApi
+  BuildBreakerApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: # See https://github.com/awsdocs/aws-cloudformation-user-guide/blob/master/doc_source/aws-resource-apigateway-deployment.md#awsapigatewaymethod-dependency
+      - HelloWorldFunctionApiMethod
+    Description: Deploys an API as a stage, so that it is web-accessible
+    Properties:
+      RestApiId: !Ref BuildBreakerApi
+      StageName: !Ref StageName
+
+  # HelloWorldFunction
+  HelloWorldFunction:
+    Type: AWS::Lambda::Function
+    Description: A hello world function for build-breaker
+    Properties:
+      Code:
+        S3Bucket: !Ref LambdaCodeBucket
+        S3Key: handlers/hello.zip
+      Handler: bin/hello
+      Runtime: go1.x
+      Role: !Ref LambdaExecutionRole
+  HelloWorldFunctionApiResource:
+    Type: AWS::ApiGateway::Resource
+    Description: The API resource for making /hello requests
+    Properties:
+      RestApiId: !Ref BuildBreakerApi
+      PathPart: hello
+      ParentId: !GetAtt BuildBreakerApi.RootResourceId
+  HelloWorldFunctionApiMethod:
+    Type: AWS::ApiGateway::Method
+    Description: Triggers HelloWorldFunction when calling the API root
+    Properties:
+      RestApiId: !Ref BuildBreakerApi
+      ResourceId: !Ref HelloWorldFunctionApiResource
+      AuthorizationType: NONE
+      HttpMethod: GET
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HelloWorldFunction.Arn}/invocations"
+        IntegrationResponses:
+          - StatusCode: 200
+      MethodResponses:
+        - StatusCode: 200
+  HelloWorldFunctionInvokePermission:
+    Type: AWS::Lambda::Permission
+    Description: Allows API GW resources to invoke HelloWorldFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref HelloWorldFunction
+      Principal: apigateway.amazonaws.com
+
+Outputs:
+  ApiUrl:
+    Description: The URL that can be used to access the backend
+    Value: !Sub "https://${BuildBreakerApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}"

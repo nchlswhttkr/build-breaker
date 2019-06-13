@@ -1,7 +1,9 @@
 .PHONY: build clean
 
 build:
-	go build -o bin/hello src/hello.go
+	GOOS=linux go build -o bin/hello src/hello.go
+	mkdir -p handlers
+	zip handlers/hello.zip bin/hello
 
 clean:
-	rm -rf bin
+	rm -rf bin handlers

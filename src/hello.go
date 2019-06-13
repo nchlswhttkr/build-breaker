@@ -1,9 +1,17 @@
 package main
 
 import (
-	"fmt"
+	"github.com/aws/aws-lambda-go/lambda"
 )
 
+type Response struct {
+	Message string `json:"message"`
+}
+
+func Handler() (Response, error) {
+	return Response{Message: "Hello from build-breaker!"}, nil
+}
+
 func main() {
-	fmt.Println("Hello world! This is build breaker!")
+	lambda.Start(Handler)
 }
