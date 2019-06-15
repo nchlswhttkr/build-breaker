@@ -15,6 +15,9 @@ Parameters:
   LambdaCodeBucket:
     Type: String
     Description: The ID of the bucket containing the code to run Lambdas off
+  LambdaCodeVersion:
+    Type: String
+    Description: A version identifier for the latest upload of code to S3
   StageName:
     Type: String
     Description: The name of the stage that the API will be deployed to
@@ -42,7 +45,7 @@ Resources:
     Properties:
       Code:
         S3Bucket: !Ref LambdaCodeBucket
-        S3Key: handlers/hello.zip
+        S3Key: !Sub "handlers/${LambdaCodeVersion}/hello.zip"
       Handler: bin/hello
       Runtime: go1.x
       Role: !Ref LambdaExecutionRole
@@ -62,13 +65,9 @@ Resources:
       AuthorizationType: NONE
       HttpMethod: GET
       Integration:
-        Type: AWS
+        Type: AWS_PROXY
         IntegrationHttpMethod: POST
         Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HelloWorldFunction.Arn}/invocations"
-        IntegrationResponses:
-          - StatusCode: 200
-      MethodResponses:
-        - StatusCode: 200
   HelloWorldFunctionInvokePermission:
     Type: AWS::Lambda::Permission
     Description: Allows API GW resources to invoke HelloWorldFunction

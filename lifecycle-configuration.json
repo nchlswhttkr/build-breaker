@@ -1,0 +1,14 @@
+{
+  "Rules": [
+    {
+      "ID": "DeleteHandlersAfterTwoDays",
+      "Expiration": {
+        "Days": 2
+      },
+      "Filter": {
+        "Prefix": "handlers/"
+      },
+      "Status": "Enabled"
+    }
+  ]
+}
