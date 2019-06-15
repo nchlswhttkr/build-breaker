@@ -15,9 +15,9 @@ Parameters:
   LambdaCodeBucket:
     Type: String
     Description: The ID of the bucket containing the code to run Lambdas off
-  LambdaCodeVersion:
+  BuildBreakerVersion:
     Type: String
-    Description: A version identifier for the latest upload of code to S3
+    Description: A version identifier to force code/deployment updates
   StageName:
     Type: String
     Description: The name of the stage that the API will be deployed to
@@ -33,6 +33,7 @@ Resources:
     Type: AWS::ApiGateway::Deployment
     DependsOn: # See https://github.com/awsdocs/aws-cloudformation-user-guide/blob/master/doc_source/aws-resource-apigateway-deployment.md#awsapigatewaymethod-dependency
       - HelloWorldFunctionApiMethod
+      - TipFunctionApiMethod
     Description: Deploys an API as a stage, so that it is web-accessible
     Properties:
       RestApiId: !Ref BuildBreakerApi
@@ -45,7 +46,7 @@ Resources:
     Properties:
       Code:
         S3Bucket: !Ref LambdaCodeBucket
-        S3Key: !Sub "handlers/${LambdaCodeVersion}/hello.zip"
+        S3Key: !Sub "handlers/${BuildBreakerVersion}/hello.zip"
       Handler: bin/hello
       Runtime: go1.x
       Role: !Ref LambdaExecutionRole
@@ -74,6 +75,44 @@ Resources:
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !Ref HelloWorldFunction
+      Principal: apigateway.amazonaws.com
+
+  # TipFunction
+  TipFunction:
+    Type: AWS::Lambda::Function
+    Description: A tip function called when a build fails
+    Properties:
+      Code:
+        S3Bucket: !Ref LambdaCodeBucket
+        S3Key: !Sub "handlers/${BuildBreakerVersion}/tip.zip"
+      Handler: bin/tip
+      Runtime: go1.x
+      Role: !Ref LambdaExecutionRole
+  TipFunctionApiResource:
+    Type: AWS::ApiGateway::Resource
+    Description: The API resource for making /tip requests
+    Properties:
+      RestApiId: !Ref BuildBreakerApi
+      PathPart: tip
+      ParentId: !GetAtt BuildBreakerApi.RootResourceId
+  TipFunctionApiMethod:
+    Type: AWS::ApiGateway::Method
+    Description: Triggers TipFunction when calling the API root
+    Properties:
+      RestApiId: !Ref BuildBreakerApi
+      ResourceId: !Ref TipFunctionApiResource
+      AuthorizationType: NONE
+      HttpMethod: POST
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TipFunction.Arn}/invocations"
+  TipFunctionInvokePermission:
+    Type: AWS::Lambda::Permission
+    Description: Allows API GW resources to invoke TipFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref TipFunction
       Principal: apigateway.amazonaws.com
 
 Outputs:
