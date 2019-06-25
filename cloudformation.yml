@@ -6,7 +6,9 @@ Description: >
   This stack uses the following resources, please be aware that you may incur
   billing costs!
     - Lambda
-    - S3 ()
+    - S3 (to upload your binaries)
+
+Transform: "AWS::Serverless-2016-10-31"
 
 Parameters:
   LambdaExecutionRole:
@@ -25,100 +27,54 @@ Parameters:
 
 Resources:
   BuildBreakerApi:
-    Type: AWS::ApiGateway::RestApi
-    Description: Creates an API GW that can be used to trigger functions
+    Type: AWS::Serverless::Api
+    Description: Creates an API that can be used to trigger functions
     Properties:
       Name: BuildBreakerApi
-  BuildBreakerApiDeployment:
-    Type: AWS::ApiGateway::Deployment
-    DependsOn: # See https://github.com/awsdocs/aws-cloudformation-user-guide/blob/master/doc_source/aws-resource-apigateway-deployment.md#awsapigatewaymethod-dependency
-      - HelloWorldFunctionApiMethod
-      - TipFunctionApiMethod
-    Description: Deploys an API as a stage, so that it is web-accessible
-    Properties:
-      RestApiId: !Ref BuildBreakerApi
       StageName: !Ref StageName
 
   # HelloWorldFunction
   HelloWorldFunction:
-    Type: AWS::Lambda::Function
+    Type: AWS::Serverless::Function
     Description: A hello world function for build-breaker
     Properties:
-      Code:
-        S3Bucket: !Ref LambdaCodeBucket
-        S3Key: !Sub "handlers/${BuildBreakerVersion}/hello.zip"
+      CodeUri:
+        Bucket: !Ref LambdaCodeBucket
+        Key: !Sub "handlers/${BuildBreakerVersion}/hello.zip"
       Handler: bin/hello
       Runtime: go1.x
       Role: !Ref LambdaExecutionRole
-  HelloWorldFunctionApiResource:
-    Type: AWS::ApiGateway::Resource
-    Description: The API resource for making /hello requests
-    Properties:
-      RestApiId: !Ref BuildBreakerApi
-      PathPart: hello
-      ParentId: !GetAtt BuildBreakerApi.RootResourceId
-  HelloWorldFunctionApiMethod:
-    Type: AWS::ApiGateway::Method
-    Description: Triggers HelloWorldFunction when calling the API root
-    Properties:
-      RestApiId: !Ref BuildBreakerApi
-      ResourceId: !Ref HelloWorldFunctionApiResource
-      AuthorizationType: NONE
-      HttpMethod: GET
-      Integration:
-        Type: AWS_PROXY
-        IntegrationHttpMethod: POST
-        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HelloWorldFunction.Arn}/invocations"
-  HelloWorldFunctionInvokePermission:
-    Type: AWS::Lambda::Permission
-    Description: Allows API GW resources to invoke HelloWorldFunction
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref HelloWorldFunction
-      Principal: apigateway.amazonaws.com
+      Events:
+        HelloFunctionApiTrigger:
+          Type: Api
+          Properties:
+            Path: /hello
+            Method: GET
+            RestApiId: !Ref BuildBreakerApi
 
   # TipFunction
   TipFunction:
-    Type: AWS::Lambda::Function
+    Type: AWS::Serverless::Function
     Description: A tip function called when a build fails
     Properties:
-      Code:
-        S3Bucket: !Ref LambdaCodeBucket
-        S3Key: !Sub "handlers/${BuildBreakerVersion}/tip.zip"
+      CodeUri:
+        Bucket: !Ref LambdaCodeBucket
+        Key: !Sub "handlers/${BuildBreakerVersion}/tip.zip"
       Handler: bin/tip
       Runtime: go1.x
       Role: !Ref LambdaExecutionRole
-  TipFunctionApiResource:
-    Type: AWS::ApiGateway::Resource
-    Description: The API resource for making /tip requests
-    Properties:
-      RestApiId: !Ref BuildBreakerApi
-      PathPart: tip
-      ParentId: !GetAtt BuildBreakerApi.RootResourceId
-  TipFunctionApiMethod:
-    Type: AWS::ApiGateway::Method
-    Description: Triggers TipFunction when calling the API root
-    Properties:
-      RestApiId: !Ref BuildBreakerApi
-      ResourceId: !Ref TipFunctionApiResource
-      AuthorizationType: NONE
-      HttpMethod: POST
-      Integration:
-        Type: AWS_PROXY
-        IntegrationHttpMethod: POST
-        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TipFunction.Arn}/invocations"
-  TipFunctionInvokePermission:
-    Type: AWS::Lambda::Permission
-    Description: Allows API GW resources to invoke TipFunction
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref TipFunction
-      Principal: apigateway.amazonaws.com
+      Events:
+        TipFunctionApiTrigger:
+          Type: Api
+          Properties:
+            Path: /tip/{provider}
+            Method: POST
+            RestApiId: !Ref BuildBreakerApi
 
 Outputs:
   ApiUrl:
     Description: The URL that can be used to access the backend
     Value: !Sub "https://${BuildBreakerApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}"
   HelloWorldUrl:
-    Description: The URL that can be used to access the backend
+    Description: The URL that can be used to trigger HelloWorldFunction
     Value: !Sub "https://${BuildBreakerApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/hello"
