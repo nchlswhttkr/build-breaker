@@ -1,0 +1,8 @@
+language: minimal
+script: exit 1
+
+# https://docs.travis-ci.com/user/notifications/#configuring-webhook-notifications
+notifications:
+  webhooks:
+    urls:
+      - https://lavutnnx0l.execute-api.ap-southeast-2.amazonaws.com/production/tip/travis
