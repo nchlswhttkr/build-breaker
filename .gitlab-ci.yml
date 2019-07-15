@@ -1,7 +1,7 @@
 image: golang:1
 job:
   script:
-    - apt update --qqy && apt install --qqy zip
+    - apt update -qqy && apt install -qqy zip
     - go get -d ./...
     - make
     - ls bin
