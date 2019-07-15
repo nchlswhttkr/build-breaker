@@ -17,10 +17,8 @@ Build and Deploy:
     - aws configure set default.region ap-southeast-2
     - BB_VERSION=$CI_COMMIT_SHORT_SHA make
     - aws s3 sync handlers/ s3://$BUCKET_NAME/handlers
-    - aws cloudformation deploy \
-      --stack-name BuildBreaker \
-      --template-file cloudformation.yml \
-      --capabilities CAPABILITY_IAM \
-      --parameter-overrides \
-      LambdaCodeBucket=$BUCKET_NAME \
-      BuildBreakerVersion=$CI_COMMIT_SHORT_SHA
+    - aws cloudformation deploy
+      --stack-name BuildBreaker
+      --template-file cloudformation.yml
+      --capabilities CAPABILITY_IAM
+      --parameter-overrides LambdaCodeBucket=$BUCKET_NAME BuildBreakerVersion=$CI_COMMIT_SHORT_SHA
