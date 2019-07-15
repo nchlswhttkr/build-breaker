@@ -1,8 +1,24 @@
 image: golang:1
+variables:
+  AWS_DEFAULT_REGION: ap-southeast-2
+  BUCKET_NAME: build-breaker
 job:
   script:
-    - apt update -qqy && apt install -qqy zip
+    - apt update -qqy && apt install -qqy zip python-pip
+    - pip install awscli
     - go get -d ./...
     - make
     - ls bin
     - ls handlers
+    - aws configure \
+      --aws_access_key_id=$AWS_ACCESS_KEY_ID \
+      --aws_secret_access_key=$AWS_SECRET_ACCESS_KEY
+    - BB_VERSION=$CI_COMMIT_SHORT_SHA make
+    - aws s3 sync handlers/ s3://$BUCKET_NAME/handlers
+    - aws cloudformation deploy \
+      --stack-name BuildBreaker \
+      --template-file cloudformation.yml \
+      --capabilities CAPABILITY_IAM \
+      --parameter-overides \
+      LambdaCodeBucket=$BUCKET_NAME \
+      BuildBreakerVersion=$CI_COMMIT_SHORT_SHA
