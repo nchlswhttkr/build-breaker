@@ -1,18 +1,20 @@
 image: golang:1
+
 variables:
-  AWS_DEFAULT_REGION: ap-southeast-2
   BUCKET_NAME: build-breaker
-job:
+
+Build and Deploy:
+  stage: deploy
   script:
-    - apt update -qqy && apt install -qqy zip python-pip
+    - apt-get update -qqy && apt-get install -qqy zip python-pip
     - pip install awscli
     - go get -d ./...
     - make
     - ls bin
     - ls handlers
-    - aws configure \
-      --aws_access_key_id=$AWS_ACCESS_KEY_ID \
-      --aws_secret_access_key=$AWS_SECRET_ACCESS_KEY
+    - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+    - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+    - aws configure set default.region ap-southeast-2
     - BB_VERSION=$CI_COMMIT_SHORT_SHA make
     - aws s3 sync handlers/ s3://$BUCKET_NAME/handlers
     - aws cloudformation deploy \
