@@ -1,3 +1,7 @@
 image: golang:1
 job:
-  script: make
+  script:
+    - go get -d ./...
+    - make
+    - ls bin
+    - ls handlers

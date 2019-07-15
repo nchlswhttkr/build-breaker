@@ -1,6 +1,6 @@
 .PHONY: build clean
 
-build: clean
+build:
 	GOOS=linux go build -o bin/hello src/hello/main.go
 	GOOS=linux go build -o bin/tip src/tip/main.go
 	mkdir -p handlers/${BB_VERSION}

@@ -27,6 +27,10 @@ You will need to make a bucket (`$BUCKET_NAME`) to upload your code to AWS.
 Here we create our bucket (with an expiration policy), compile and upload the binaries and deploy.
 
 ```sh
+# Get the repository
+go get github.com/nchlswhttkr/build-breaker
+cd $GOPATH/src/github.com/nchlswhttkr/build-breaker
+
 # Configure your Access Key ID/Secret and region, role and code bucket
 export BUCKET_NAME="Your bucket name here"
 aws configure
