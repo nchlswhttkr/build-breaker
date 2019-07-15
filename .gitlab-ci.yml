@@ -21,6 +21,6 @@ Build and Deploy:
       --stack-name BuildBreaker \
       --template-file cloudformation.yml \
       --capabilities CAPABILITY_IAM \
-      --parameter-overides \
+      --parameter-overrides \
       LambdaCodeBucket=$BUCKET_NAME \
       BuildBreakerVersion=$CI_COMMIT_SHORT_SHA
