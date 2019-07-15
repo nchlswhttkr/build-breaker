@@ -1,19 +1,11 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
 Description: >
-  The template for https://github.com/nchlswhttkr/build-breaker
-
-  This stack uses the following resources, please be aware that you may incur
-  billing costs!
-    - Lambda
-    - S3 (to upload your binaries)
+  An application defined by https://github.com/nchlswhttkr/build-breaker
 
 Transform: "AWS::Serverless-2016-10-31"
 
 Parameters:
-  LambdaExecutionRole:
-    Type: String
-    Description: The role which lambda functions execute with
   LambdaCodeBucket:
     Type: String
     Description: The ID of the bucket containing the code to run Lambdas off
@@ -26,6 +18,26 @@ Parameters:
     Default: production
 
 Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Description: The role which functions execute with
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service: lambda.amazonaws.com
+      Policies:
+        - PolicyName: BuildBreakerCloudwatchLogs
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: logs:*
+                Resource: "*"
+
   BuildBreakerApi:
     Type: AWS::Serverless::Api
     Description: Creates an API that can be used to trigger functions
@@ -43,7 +55,7 @@ Resources:
         Key: !Sub "handlers/${BuildBreakerVersion}/hello.zip"
       Handler: bin/hello
       Runtime: go1.x
-      Role: !Ref LambdaExecutionRole
+      Role: !GetAtt LambdaExecutionRole.Arn
       Events:
         HelloFunctionApiTrigger:
           Type: Api
@@ -62,7 +74,7 @@ Resources:
         Key: !Sub "handlers/${BuildBreakerVersion}/tip.zip"
       Handler: bin/tip
       Runtime: go1.x
-      Role: !Ref LambdaExecutionRole
+      Role: !GetAtt LambdaExecutionRole.Arn
       Events:
         TipFunctionApiTrigger:
           Type: Api
