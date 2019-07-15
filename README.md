@@ -2,15 +2,13 @@
 
 Track the builds you break, make charitable contributions to atone for your crimes!
 
-Is your [![Build Status](https://travis-ci.org/nchlswhttkr/build-breaker.svg?branch=master&style=flat-square)](https://travis-ci.org/nchlswhttkr/build-breaker)?
-
 [We have a theme song!](https://youtu.be/YPG5ASujyZg)
 
 ## Usage
 
 Build Breaker can be set up to receive web requests from your CI provider, and to record when a failed build occurs.
 
-### [Travis CI](https://travis-ci.org)
+### [Travis CI](https://travis-ci.org) [![Build Status](https://travis-ci.org/nchlswhttkr/build-breaker.svg?branch=master&style=flat-square)](https://travis-ci.org/nchlswhttkr/build-breaker)
 
 Travis CI supports webhooks for notifications when a build status changes.
 
@@ -44,7 +42,7 @@ aws cloudformation deploy \
     --stack-name BuildBreaker \
     --template-file cloudformation.yml \
     --capabilities CAPABILITY_IAM \
-    --parameter-overrides LambdaCodeBucket=$BUCKET_NAME
+    --parameter-overrides LambdaCodeBucket=$BUCKET_NAME BuildBreakerVersion=default
 
 # You can find the API of your URL as a stack output
 aws cloudformation describe-stacks --stack-name BuildBreaker --query "Stacks[0].Outputs[?OutputKey=='HelloWorldUrl'].OutputValue" --output text
