@@ -17,13 +17,14 @@ type Build struct {
 	ProjectName  string `json:"projectName"`
 	ProjectOwner string `json:"projectOwner"`
 	ProjectHost  string `json:"projectHost"`
-	BuildId      string `json:"buildId"` // builds can be retried, this may not be unique
+	BuildNumber  string `json:"buildNumber"` // builds can be retried, this may not be unique
 
 }
 
 type TravisResponse struct {
-	Number     string `json:"number"`
-	Repository struct {
+	Number        string `json:"number"`
+	StatusMessage string `json:"status_message"` // duplicated by ResultMessage?
+	Repository    struct {
 		Name      string `json:"name"`
 		OwnerName string `json:"owner_name"`
 	} `json:"repository"`
@@ -35,7 +36,7 @@ func Handler(ctx context.Context, e events.APIGatewayProxyRequest) (events.APIGa
 	var build Build
 
 	if provider == "travis" {
-		err = InterpretTravisResponse(e.Body, &build)
+		err = InterpretTravisResponse(e, &build)
 	} else {
 		return GenerateBadRequestResponse(errors.New("A known build provider must be specified"))
 	}
@@ -48,7 +49,7 @@ func Handler(ctx context.Context, e events.APIGatewayProxyRequest) (events.APIGa
 		return GenerateErrorResponse(err)
 	}
 
-	fmt.Printf("Processed build #%s from %s %s/%s/%s\n", build.BuildId, build.Provider, build.ProjectHost, build.ProjectOwner, build.ProjectName)
+	fmt.Printf("Processed build #%s from %s %s/%s/%s\n", build.BuildNumber, build.Provider, build.ProjectHost, build.ProjectOwner, build.ProjectName)
 	return events.APIGatewayProxyResponse{
 		Body:       string(body),
 		StatusCode: 201,
@@ -56,14 +57,14 @@ func Handler(ctx context.Context, e events.APIGatewayProxyRequest) (events.APIGa
 
 }
 
-func InterpretTravisResponse(body string, build *Build) error {
+func InterpretTravisResponse(e events.APIGatewayProxyRequest, build *Build) error {
 	var err error
 	var unescaped string
 	var travis TravisResponse
 
 	// find the percent-encoded, stringified JSON from the payload field
 	// https://developer.mozilla.org/en-US/docs/Glossary/percent-encoding
-	tuples := strings.Split(body, "&")
+	tuples := strings.Split(e.Body, "&")
 	for _, tuple := range tuples {
 		if strings.HasPrefix(tuple, "payload=") {
 			unescaped, err = url.QueryUnescape(tuple[8:])
@@ -78,11 +79,28 @@ func InterpretTravisResponse(body string, build *Build) error {
 		return err
 	}
 
+	fmt.Printf("Received notification from Travis CI (%s/%s#%s - %s)\n", travis.Repository.OwnerName, travis.Repository.Name, travis.Number, travis.StatusMessage)
+
+	// Travis may notify for all build status changes, not just failures
+	// See status_message in https://docs.travis-ci.com/user/notifications/#configuring-webhook-notifications
+	switch status := travis.StatusMessage; status {
+	case "Broken":
+	case "Failed":
+	case "Still Failing":
+	case "Errored":
+		break
+	default:
+		err = errors.New("The build has not failed, nothing will be recorded")
+	}
+	if err != nil {
+		return err
+	}
+
 	build.Provider = "travis"
 	build.ProjectName = travis.Repository.Name
 	build.ProjectOwner = travis.Repository.OwnerName
 	build.ProjectHost = "https://github.com"
-	build.BuildId = travis.Number
+	build.BuildNumber = travis.Number
 	return nil
 }
 

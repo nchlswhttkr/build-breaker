@@ -1,4 +1,4 @@
-# [Build Breaker](https://twitter.com/nchlswhttkr/status/1121322470592499713)
+# [Build Breaker](https://twitter.com/nchlswhttkr/status/1121322470592499713) [![GitLab CI Pipeline Status](https://gitlab.com/nchlswhttkr/build-breaker/badges/master/pipeline.svg?style=flat-square)](https://gitlab.com/nchlswhttkr/build-breaker/commits/master)
 
 Track the builds you break, make charitable contributions to atone for your crimes!
 
@@ -8,7 +8,7 @@ Track the builds you break, make charitable contributions to atone for your crim
 
 Build Breaker can be set up to receive web requests from your CI provider, and to record when a failed build occurs.
 
-### [Travis CI](https://travis-ci.org) [![Build Status](https://travis-ci.org/nchlswhttkr/build-breaker.svg?branch=master&style=flat-square)](https://travis-ci.org/nchlswhttkr/build-breaker)
+### [Travis CI](https://travis-ci.org) [![Travis CI Build Status](https://travis-ci.org/nchlswhttkr/build-breaker.svg?branch=master&style=flat-square)](https://travis-ci.org/nchlswhttkr/build-breaker)
 
 Travis CI supports webhooks for notifications when a build status changes.
 
@@ -37,7 +37,9 @@ aws configure
 
 # Build the project and sync our binaries to S3, with an expiration lifecycle
 aws s3 mb s3://$BUCKET_NAME
-aws s3api put-bucket-lifecycle-configuration --bucket $BUCKET_NAME --lifecycle-configuration file://lifecycle-configuration.json
+aws s3api put-bucket-lifecycle-configuration \
+    --bucket $BUCKET_NAME \
+    --lifecycle-configuration file://lifecycle-configuration.json
 make
 aws s3 sync handlers/ s3://$BUCKET_NAME/handlers
 
@@ -49,12 +51,15 @@ aws cloudformation deploy \
     --parameter-overrides LambdaCodeBucket=$BUCKET_NAME BuildBreakerVersion=default
 
 # You can find the API of your URL as a stack output
-aws cloudformation describe-stacks --stack-name BuildBreaker --query "Stacks[0].Outputs[?OutputKey=='HelloWorldUrl'].OutputValue" --output text
+aws cloudformation describe-stacks \
+    --stack-name BuildBreaker \
+    --query "Stacks[0].Outputs[?OutputKey=='HelloWorldUrl'].OutputValue" \
+    --output text
 ```
 
 To ensure that future deployments of our Lamdba functions use up-to-date code (CloudFormation only updates the stack where it changes), you can use the `BB_VERSION` environment variable when building and deploying. The `Makefile` is set up to use this variable if it is set, and our CloudFormation template allows a `BuildBreakerVersion` parameter override to be used.
 
-```
+```shell
 export BB_VERSION="A unique version identifier"
 make
 aws s3 sync handlers/ s3://$BUCKET_NAME/handlers
