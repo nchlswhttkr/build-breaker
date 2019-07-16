@@ -8,7 +8,7 @@ Track the builds you break, make charitable contributions to atone for your crim
 
 Build Breaker can be set up to receive web requests from your CI provider, and to record when a failed build occurs.
 
-### [Travis CI](https://travis-ci.org) [![Travis CI Build Status](https://travis-ci.org/nchlswhttkr/build-breaker.svg?branch=master&style=flat-square)](https://travis-ci.org/nchlswhttkr/build-breaker)
+### [Travis CI](https://travis-ci.org) [![Travis CI Build Status](https://travis-ci.org/nchlswhttkr/build-breaker.svg?branch=master)](https://travis-ci.org/nchlswhttkr/build-breaker)
 
 Travis CI supports webhooks for notifications when a build status changes.
 
@@ -19,6 +19,13 @@ notifications:
       - https://lavutnnx0l.execute-api.ap-southeast-2.amazonaws.com/production/tip/travis
 
 ```
+
+### [Bitbucket](https://bitbucket.org) ![Bitbucket Pipelines Build Status](https://img.shields.io/bitbucket/pipelines/nchlswhttkr/build-breaker.svg)
+
+Bitbucket allows repositories to be configured to [send notifications about builds](https://confluence.atlassian.com/bitbucket/manage-webhooks-735643732.html#Managewebhooks-create_webhookCreatingwebhooks).
+
+- The URL for your webhook will be `https://lavutnnx0l.execute-api.ap-southeast-2.amazonaws.com/production/tip/bitbucket`
+- You'll want it to trigger on **Build status created** and **Build status updated**
 
 ## Setting up your own instance
 

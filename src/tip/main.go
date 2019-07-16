@@ -12,6 +12,8 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
+// TODO: Check signing on Travis responses
+
 type Build struct {
 	Provider     string `json:"provider"`
 	ProjectName  string `json:"projectName"`
@@ -37,6 +39,9 @@ func Handler(ctx context.Context, e events.APIGatewayProxyRequest) (events.APIGa
 
 	if provider == "travis" {
 		err = InterpretTravisResponse(e, &build)
+	} else if provider == "bitbucket" {
+		err = errors.New("Bitbucket Pipelines is not yet supported")
+		// TODO: Implement InterpretBitbucketResponse()
 	} else {
 		return GenerateBadRequestResponse(errors.New("A known build provider must be specified"))
 	}

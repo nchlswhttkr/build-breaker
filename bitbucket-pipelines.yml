@@ -1,0 +1,7 @@
+pipelines:
+  default:
+    - step:
+        name: "Fail Build"
+        image: alpine
+        script:
+          - exit 1
