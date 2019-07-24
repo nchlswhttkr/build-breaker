@@ -12,6 +12,7 @@ Parameters:
   BuildBreakerVersion:
     Type: String
     Description: A version identifier to force code/deployment updates
+    Default: initial
   StageName:
     Type: String
     Description: The name of the stage that the API will be deployed to

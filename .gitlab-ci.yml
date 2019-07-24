@@ -12,8 +12,8 @@ Build and Deploy:
     - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
     - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
     - aws configure set default.region ap-southeast-2
-    - BB_VERSION=$CI_COMMIT_SHORT_SHA make
-    - aws s3 sync handlers/ s3://$BUCKET_NAME/handlers
+    - make
+    - aws s3 sync handlers/ s3://$BUCKET_NAME/handlers/$CI_COMMIT_SHORT_SHA
     - aws cloudformation deploy
       --stack-name BuildBreaker
       --template-file cloudformation.yml

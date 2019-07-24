@@ -20,12 +20,12 @@ notifications:
 
 ```
 
-### [Bitbucket](https://bitbucket.org) ![Bitbucket Pipelines Build Status](https://img.shields.io/bitbucket/pipelines/nchlswhttkr/build-breaker.svg)
+### [Bitbucket](https://bitbucket.org) [![Bitbucket Pipelines Build Status](https://img.shields.io/bitbucket/pipelines/nchlswhttkr/build-breaker.svg)](https://bitbucket.org/nchlswhttkr/build-breaker/addon/pipelines/home)
 
 Bitbucket allows repositories to be configured to [send notifications about builds](https://confluence.atlassian.com/bitbucket/manage-webhooks-735643732.html#Managewebhooks-create_webhookCreatingwebhooks).
 
 - The URL for your webhook will be `https://lavutnnx0l.execute-api.ap-southeast-2.amazonaws.com/production/tip/bitbucket`
-- You'll want it to trigger on **Build status created** and **Build status updated**
+- The actions that trigger the webhook should be **Build status created** and **Build status updated**
 
 ## Setting up your own instance
 
@@ -39,7 +39,7 @@ go get github.com/nchlswhttkr/build-breaker
 cd $GOPATH/src/github.com/nchlswhttkr/build-breaker
 
 # Configure your Access Key ID/Secret and region, role and code bucket
-export BUCKET_NAME="Your bucket name here"
+export BUCKET_NAME="build-breaker"
 aws configure
 
 # Build the project and sync our binaries to S3, with an expiration lifecycle
@@ -48,14 +48,14 @@ aws s3api put-bucket-lifecycle-configuration \
     --bucket $BUCKET_NAME \
     --lifecycle-configuration file://lifecycle-configuration.json
 make
-aws s3 sync handlers/ s3://$BUCKET_NAME/handlers
+aws s3 sync handlers/ s3://$BUCKET_NAME/handlers/initial
 
 # Deploy the stack, with the permission to create IAM entities (--capabilities)
 aws cloudformation deploy \
     --stack-name BuildBreaker \
     --template-file cloudformation.yml \
     --capabilities CAPABILITY_IAM \
-    --parameter-overrides LambdaCodeBucket=$BUCKET_NAME BuildBreakerVersion=default
+    --parameter-overrides LambdaCodeBucket=$BUCKET_NAME
 
 # You can find the API of your URL as a stack output
 aws cloudformation describe-stacks \
@@ -64,12 +64,12 @@ aws cloudformation describe-stacks \
     --output text
 ```
 
-To ensure that future deployments of our Lamdba functions use up-to-date code (CloudFormation only updates the stack where it changes), you can use the `BB_VERSION` environment variable when building and deploying. The `Makefile` is set up to use this variable if it is set, and our CloudFormation template allows a `BuildBreakerVersion` parameter override to be used.
+To ensure that future deployments of our Lamdba functions use up-to-date code (CloudFormation only updates the stack when the path to the code changes), you can use the an environment variable when building and deploying.
 
 ```shell
-export BB_VERSION="A unique version identifier"
+export BB_VERSION="2019-01-01-abc123"
 make
-aws s3 sync handlers/ s3://$BUCKET_NAME/handlers
+aws s3 sync handlers/ s3://$BUCKET_NAME/handlers/$BB_VERSION
 aws cloudformation deploy \
     --stack-name BuildBreaker \
     --template-file cloudformation.yml \
