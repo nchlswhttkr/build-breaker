@@ -10,7 +10,7 @@ Build Breaker can be set up to receive web requests from your CI provider, and t
 
 ### [Travis CI](https://travis-ci.org) [![Travis CI Build Status](https://travis-ci.org/nchlswhttkr/build-breaker.svg?branch=master)](https://travis-ci.org/nchlswhttkr/build-breaker)
 
-Travis CI supports webhooks for notifications when a build status changes.
+Travis CI supports webhooks for notifications when a build status changes. You can add them in your `.travis.yml` configuration.
 
 ```
 notifications:
