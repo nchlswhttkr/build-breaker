@@ -1,16 +1,20 @@
 # [Build Breaker](https://twitter.com/nchlswhttkr/status/1121322470592499713) [![GitLab CI Pipeline Status](https://gitlab.com/nchlswhttkr/build-breaker/badges/master/pipeline.svg?style=flat-square)](https://gitlab.com/nchlswhttkr/build-breaker/commits/master)
 
-Track the builds you break, make charitable contributions to atone for your crimes!
+> :exclamation: Build Breaker is still under development, use at your own risk.
+
+_Track the builds you break and atone for your crimes!_
+
+Build Breaker can be set up with your CI process to record failed builds. Like a swear jar, you should try to make up for each failed build with a small donation.
 
 [We have a theme song!](https://youtu.be/YPG5ASujyZg)
 
 ## Usage
 
-Build Breaker can be set up to receive web requests from your CI provider, and to record when a failed build occurs.
+Build Breaker receives web requests from your CI provider, and records failed builds. This varies between providers.
 
 ### [Travis CI](https://travis-ci.org) [![Travis CI Build Status](https://travis-ci.org/nchlswhttkr/build-breaker.svg?branch=master)](https://travis-ci.org/nchlswhttkr/build-breaker)
 
-Travis CI supports webhooks for notifications when a build status changes. You can add them in your `.travis.yml` configuration.
+Travis CI supports [webhooks for notifications](https://docs.travis-ci.com/user/notifications#configuring-webhook-notifications) when a build's status changes. You can add them in your `.travis.yml` configuration.
 
 ```
 notifications:
@@ -22,10 +26,12 @@ notifications:
 
 ### [Bitbucket](https://bitbucket.org) [![Bitbucket Pipelines Build Status](https://img.shields.io/bitbucket/pipelines/nchlswhttkr/build-breaker.svg)](https://bitbucket.org/nchlswhttkr/build-breaker/addon/pipelines/home)
 
-Bitbucket allows repositories to be configured to [send notifications about builds](https://confluence.atlassian.com/bitbucket/manage-webhooks-735643732.html#Managewebhooks-create_webhookCreatingwebhooks).
+Bitbucket can be configured to [send notifications about builds](https://confluence.atlassian.com/bitbucket/manage-webhooks-735643732.html#Managewebhooks-create_webhookCreatingwebhooks) for your projects.
 
 - The URL for your webhook will be `https://lavutnnx0l.execute-api.ap-southeast-2.amazonaws.com/production/tip/bitbucket`
-- The actions that trigger the webhook should be **Build status created** and **Build status updated**
+- The webhook should be triggered by the **Build status created** and **Build status updated** actions
+
+---
 
 ## Setting up your own instance
 
