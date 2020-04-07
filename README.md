@@ -31,6 +31,23 @@ Bitbucket can be configured to [send notifications about builds](https://conflue
 - The URL for your webhook will be `https://lavutnnx0l.execute-api.ap-southeast-2.amazonaws.com/production/tip/bitbucket`
 - The webhook should be triggered by the **Build status created** and **Build status updated** actions
 
+### [Circle CI](https://circleci.com) [![CircleCI](https://circleci.com/gh/nchlswhttkr/build-breaker.svg?style=svg)](https://circleci.com/gh/nchlswhttkr/build-breaker)
+
+Circle CI supports allows steps within a job to run `on_fail`, this can be used to make a POST to Build Breaker. You should add the following step to jobs when you want them to notify.
+
+_You must be using Circle CI v2.1 or greater for this._
+
+```yml
+version: 2.1
+# ...
+steps:
+  - run:
+      command: https://lavutnnx0l.execute-api.ap-southeast-2.amazonaws.com/production/tip/circle
+      when: on_fail
+```
+
+https://circleci.com/docs/2.0/configuration-reference/#the-when-step-requires-version-21
+
 ---
 
 ## Setting up your own instance
